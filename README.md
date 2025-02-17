@@ -26,5 +26,3 @@ Después de ejecutar los scripts, revisa las tablas y consulta los datos para co
 MySQL → Sistema de gestión de bases de datos relacional.
 MySQL Workbench → Herramienta para la ejecución de scripts y administración de bases de datos.
 
-📜 Licencia
-Este proyecto está bajo la Licencia MIT. Ver el archivo LICENSE para más detalles.
