@@ -77,7 +77,6 @@ WHERE FECHA_PAGO > '2024-09-17';
  SELECT MONTHNAME(CUMPLEAÑOS_CLIENTE) AS MES_CUMPLEAÑOS,
  COUNT(*) AS N_CLIENTES
  FROM Clientes
-<<<<<<< HEAD
  GROUP BY MONTHNAME(CUMPLEAÑOS_CLIENTE);
  
  -- JOIN
@@ -176,6 +175,80 @@ ON Tratamientos.ID_TTO = Citas.ID_TTO
 where Citas.FECHA_HORA >= DATE_SUB(CURDATE(), INTERVAL 1 MONTH)
 GROUP BY Tratamientos.NOMBRE_TTO
 ORDER BY n_veces DESC;
-=======
- GROUP BY MONTHNAME(CUMPLEAÑOS_CLIENTE);
->>>>>>> 0a9cb308ddd64595e050b591ff13ab01a6b005f1
+
+-- VISTAS 
+-- Citas Pendientes con Datos del Cliente y del Tratamiento
+-- Muestra las citas que aún no se han completado, junto con la información del cliente y el tratamiento.
+CREATE VIEW CitasPendientes AS
+SELECT Clientes.NOMBRE_CLIENTE as Nombre_cliente,
+Clientes.TELEFONO_CLIENTE as tlfno,
+Clientes.EMAIL_CLIENTE as email,
+Citas.FECHA_HORA as cita
+FROM Clientes
+LEFT JOIN Citas
+ON Clientes.ID_CLIENTE = Citas.ID_CLIENTE
+where Citas.estado = 'Pendiente';
+
+-- Ingresos Totales por Mes
+-- Permite ver cuánto dinero ha ingresado el centro de estética por pagos, agrupados por mes y año.
+CREATE VIEW PagosTotalesPorMesAño AS
+SELECT SUM(Pagos.CUANTIA)as total, MONTHNAME(FECHA_PAGO) as Mes, YEAR(FECHA_PAGO) as año
+FROM Pagos
+GROUP BY YEAR(FECHA_PAGO), MONTH(FECHA_PAGO), MONTHNAME(FECHA_PAGO) 
+ORDER BY YEAR(FECHA_PAGO), MONTH(FECHA_PAGO);
+
+-- Clientes Sin Citas Registradas
+-- Lista los clientes que no tienen ninguna cita en la base de datos.
+CREATE VIEW ClienteSinCitas AS
+SELECT Clientes.NOMBRE_CLIENTE as NOMBRE_CLIENTE,
+Clientes.TELEFONO_CLIENTE as tlfno
+from Clientes 
+LEFT JOIN Citas
+ON Clientes.ID_CLIENTE = Citas.ID_CLIENTE
+where Citas.ID_CITA IS NULL; 
+
+-- TRIGGERS 
+-- Evitar que se agenden citas en el pasado
+-- Crea un trigger BEFORE INSERT en la tabla Citas que impida insertar una cita con fecha anterior a la actual.
+DELIMITER $$
+CREATE trigger EvitarCitasPasado
+BEFORE INSERT 
+ON Citas
+FOR EACH ROW
+BEGIN 
+	IF NEW.FECHA_HORA < NOW() THEN 
+    SIGNAL SQLSTATE '45000' 
+        SET MESSAGE_TEXT = 'No se pueden agendar citas en el pasado';
+    END IF;
+END$$
+DELIMITER ;
+
+-- Actualizar el estado de una cita cuando se realiza un pago
+-- Crea un trigger AFTER INSERT en la tabla Pagos que cambie el estado de la cita a "Pagada" cuando se registra un pago para ella.
+DELIMITER $$
+CREATE TRIGGER RealizarPago
+AFTER INSERT 
+ON Pagos
+FOR EACH ROW
+BEGIN
+	IF new.estado = 'COMPLETADO' THEN
+	UPDATE Citas
+    SET ESTADO = 'Pagada'
+    WHERE ID_CITA = NEW.ID_CITA; 
+    END IF;
+END$$
+DELIMITER ;
+
+-- Registrar la última cita de cada cliente
+-- Crea un trigger AFTER INSERT en Citas que actualice un campo ULTIMA_CITA en la tabla Clientes con la fecha de la nueva cita registrada para ese cliente.
+DELIMITER $$
+CREATE TRIGGER RegistroUltimaCita
+AFTER INSERT
+ON Citas
+FOR EACH ROW
+BEGIN
+	UPDATE Clientes
+	SET ULTIMA_CITA = NEW.FECHA_HORA
+	WHERE ID_CLIENTE = NEW.ID_CLIENTE;
+END$$
+DELIMITER ;

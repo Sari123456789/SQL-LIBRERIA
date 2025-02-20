@@ -164,18 +164,13 @@ VALUES
 ('EFECTIVO', '2024-11-12 12:15:00', 40.00, 15),  -- Beatriz Ruiz
 ('TARJETA', '2024-12-22 13:15:00', 65.00, 16);  -- José Martínez
 
-<<<<<<< HEAD
 -- VER ORGANIZACION TABLAS 
-=======
-
->>>>>>> 0a9cb308ddd64595e050b591ff13ab01a6b005f1
 SELECT * FROM Empleados;
 SELECT * FROM Tratamientos;
 SELECT * FROM Clientes;
 select * from Citas;
 Select * from Pagos;
 
-<<<<<<< HEAD
 -- Insertamos más datos para que haya alguno nulo
 -- Empleado sin tratamientos realizados
 INSERT INTO Empleados (NOMBRE_EMPLEADO, CARGO, TELEFONO_EMPLEADO, EMAIL_EMPLEADO)
@@ -192,8 +187,6 @@ INSERT INTO Clientes (NOMBRE_CLIENTE, EMAIL_CLIENTE, TELEFONO_CLIENTE, CUMPLEAÑ
 VALUES ('Manolo Rodríguez', 'loloro@gmail.com', '914123856', '1995-06-15', '2022-01-01'),
 ('Inés Rodríguez', 'inesro@gmail.com', '914703850', '1994-06-15', '2022-11-08');
 
-=======
->>>>>>> 0a9cb308ddd64595e050b591ff13ab01a6b005f1
 
 
 
